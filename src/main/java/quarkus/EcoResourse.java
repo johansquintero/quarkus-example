@@ -2,30 +2,21 @@ package quarkus;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
 
 @Path("/greetings")
 public class EcoResourse {
 
     @GET
-    public String greeteing() {
-        return "Hello world! ";
+    public String greeteing(@QueryParam("message") String message) {
+        return message!=null?">\t" + message:"I don't know what to say";
     }
 
     @GET
-    @Path("/morning")
-    public String morning() {
-        return "Hello world, good morning! ";
+    @Path("/{name}")
+    public String greeteingTo(@PathParam("name") String name) {
+        return "Hi "+name;
     }
 
-    @GET
-    @Path("/afternoon")
-    public String afternoon(){
-        return "Hello world, good afternoon!";
-    }
-
-    @GET
-    @Path("/night")
-    public String night(){
-        return "Hello world, good night!";
-    }
 }
