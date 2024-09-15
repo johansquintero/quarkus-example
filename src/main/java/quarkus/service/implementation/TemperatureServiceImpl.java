@@ -2,6 +2,7 @@ package quarkus.service.implementation;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import quarkus.Temperature;
+import quarkus.presentation.advice.exception.TemperatureException;
 import quarkus.service.interfaces.ITemperatureService;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 
 public class TemperatureServiceImpl implements ITemperatureService {
     private List<Temperature> temperatures = new ArrayList<>();
+
     @Override
     public List<Temperature> getAll() {
         return Collections.unmodifiableList(this.temperatures);
@@ -25,7 +27,7 @@ public class TemperatureServiceImpl implements ITemperatureService {
                 .filter(t -> t.getCity().equalsIgnoreCase(temperature.getCity()))
                 .findFirst();
         if (found.isPresent()) {
-            throw new RuntimeException("The temperature already exists");
+            throw new TemperatureException("The temperature already exists");
         }
         this.temperatures.add(temperature);
         return temperature;
@@ -37,18 +39,17 @@ public class TemperatureServiceImpl implements ITemperatureService {
                 .filter(t -> t.getCity().equalsIgnoreCase(temperature.getCity()))
                 .findFirst();
         if (found.isEmpty()) {
-            this.temperatures.add(temperature);
-        } else {
-            this.temperatures = this.temperatures.stream()
-                    .map(t -> {
-                        if (t.getCity().equalsIgnoreCase(temperature.getCity())) {
-                            t.setCity(temperature.getCity());
-                            t.setMax(temperature.getMax());
-                            t.setMin(temperature.getMin());
-                        }
-                        return t;
-                    }).collect(Collectors.toList());
+            throw new TemperatureException("The temperature doesn't exists");
         }
+        this.temperatures = this.temperatures.stream()
+                .map(t -> {
+                    if (t.getCity().equalsIgnoreCase(temperature.getCity())) {
+                        t.setCity(temperature.getCity());
+                        t.setMax(temperature.getMax());
+                        t.setMin(temperature.getMin());
+                    }
+                    return t;
+                }).collect(Collectors.toList());
         return temperature;
     }
 
@@ -61,6 +62,6 @@ public class TemperatureServiceImpl implements ITemperatureService {
             this.temperatures = this.temperatures.stream().filter(temperature -> !temperature.getCity().equalsIgnoreCase(cityName))
                     .collect(Collectors.toList());
         }
-        return found.orElse(new Temperature("dafult",1,1));
+        return found.orElseThrow(() -> new TemperatureException("The temperature doesn't exists"));
     }
 }
