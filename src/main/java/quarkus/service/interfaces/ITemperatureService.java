@@ -1,12 +1,12 @@
 package quarkus.service.interfaces;
 
-import quarkus.Temperature;
+import quarkus.TemperatureDTO;
 
 import java.util.List;
 
 public interface ITemperatureService {
-    List<Temperature> getAll();
-    Temperature save(Temperature temperature);
-    Temperature update(Temperature temperature);
-    Temperature delete(String cityName);
+    List<TemperatureDTO> getAll();
+    TemperatureDTO save(TemperatureDTO temperatureDTO);
+    TemperatureDTO update(TemperatureDTO temperatureDTO);
+    String delete(Long id);
 }

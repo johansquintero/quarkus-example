@@ -1,67 +1,71 @@
 package quarkus.service.implementation;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import quarkus.Temperature;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
+import quarkus.TemperatureDTO;
+import quarkus.persistence.entity.TemperatureEntity;
+import quarkus.persistence.repository.TemperatureCrudRepository;
 import quarkus.presentation.advice.exception.TemperatureException;
 import quarkus.service.interfaces.ITemperatureService;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
-
+@Transactional
 public class TemperatureServiceImpl implements ITemperatureService {
-    private List<Temperature> temperatures = new ArrayList<>();
+    private final TemperatureCrudRepository temperatureCrudRepository;
+    private final ModelMapper modelMapper;
 
-    @Override
-    public List<Temperature> getAll() {
-        return Collections.unmodifiableList(this.temperatures);
+    @Inject
+    public TemperatureServiceImpl(TemperatureCrudRepository temperatureCrudRepository) {
+        this.temperatureCrudRepository = temperatureCrudRepository;
+        this.modelMapper = new ModelMapper();
     }
 
     @Override
-    public Temperature save(Temperature temperature) {
-        Optional<Temperature> found = this.temperatures.stream()
-                .filter(t -> t.getCity().equalsIgnoreCase(temperature.getCity()))
-                .findFirst();
-        if (found.isPresent()) {
-            throw new TemperatureException("The temperature already exists");
-        }
-        this.temperatures.add(temperature);
-        return temperature;
+    public List<TemperatureDTO> getAll() {
+        return this.temperatureCrudRepository.listAll().stream().map(temperatureEntity -> {
+            return modelMapper.map(temperatureEntity, TemperatureDTO.class);
+        }).toList();
     }
 
     @Override
-    public Temperature update(Temperature temperature) {
-        Optional<Temperature> found = this.temperatures.stream()
-                .filter(t -> t.getCity().equalsIgnoreCase(temperature.getCity()))
-                .findFirst();
+    public TemperatureDTO save(TemperatureDTO temperatureDTO) {
+//        Optional<TemperatureEntity> found = this.temperatures.stream()
+//                .filter(t -> t.getCity().equalsIgnoreCase(temperatureDTO.getCity()))
+//                .findFirst();
+//        if (found.isPresent()) {
+//            throw new TemperatureException("The temperatureDTO already exists");
+//        }
+        temperatureDTO.setRegisteredDate(LocalDateTime.now());
+        TemperatureEntity newTemperature = modelMapper.map(temperatureDTO, TemperatureEntity.class);
+        this.temperatureCrudRepository.persist(newTemperature);
+        return this.modelMapper.map(newTemperature, TemperatureDTO.class);
+    }
+
+    @Override
+    public TemperatureDTO update(TemperatureDTO temperatureDTO) {
+        TemperatureEntity found = this.temperatureCrudRepository.findByIdOptional(temperatureDTO.getId()).orElseThrow(()-> {
+            throw new TemperatureException("The temperatureDTO doesn't exists");
+        });
+        found.setCity(temperatureDTO.getCity());
+        found.setMin(temperatureDTO.getMin());
+        found.setMax(temperatureDTO.getMax());
+        this.temperatureCrudRepository.persist(found);
+        return modelMapper.map(found,TemperatureDTO.class);
+    }
+
+    @Override
+    public String delete(Long id) {
+        Optional<TemperatureEntity> found = this.temperatureCrudRepository.findByIdOptional(id);
         if (found.isEmpty()) {
-            throw new TemperatureException("The temperature doesn't exists");
+            throw new TemperatureException("The temperatureDTO doesn't exists");
         }
-        this.temperatures = this.temperatures.stream()
-                .map(t -> {
-                    if (t.getCity().equalsIgnoreCase(temperature.getCity())) {
-                        t.setCity(temperature.getCity());
-                        t.setMax(temperature.getMax());
-                        t.setMin(temperature.getMin());
-                    }
-                    return t;
-                }).collect(Collectors.toList());
-        return temperature;
-    }
-
-    @Override
-    public Temperature delete(String cityName) {
-        Optional<Temperature> found = this.temperatures.stream()
-                .filter(temperature -> temperature.getCity().equalsIgnoreCase(cityName))
-                .findFirst();
-        if (found.isPresent()) {
-            this.temperatures = this.temperatures.stream().filter(temperature -> !temperature.getCity().equalsIgnoreCase(cityName))
-                    .collect(Collectors.toList());
-        }
-        return found.orElseThrow(() -> new TemperatureException("The temperature doesn't exists"));
+        this.temperatureCrudRepository.delete(found.get());
+        return "Temperature removed successfully";
     }
 }
