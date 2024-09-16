@@ -6,4 +6,5 @@ import quarkus.persistence.entity.TemperatureEntity;
 
 @ApplicationScoped
 public class TemperatureCrudRepository implements PanacheRepository<TemperatureEntity> {
+
 }

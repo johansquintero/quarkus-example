@@ -9,10 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Provider
-public class TemperatureExceptionMapper implements ExceptionMapper<TemperatureException> {
+public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException> {
 
     @Override
-    public Response toResponse(TemperatureException e) {
+    public Response toResponse(RuntimeException e) {
         Map<String, Object> response = new HashMap<>();
         response.put("message", e.getMessage());
         response.put("status_code", Response.Status.NOT_ACCEPTABLE);
