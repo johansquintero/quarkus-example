@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -16,4 +17,7 @@ public class BookDTO {
     private String title;
     private String author;
     private LocalDate publishedDate;
+    private String genre;
+    private LocalDate createdAt;
+    private LocalDate lastUpdate;
 }

@@ -8,6 +8,8 @@ import java.util.Optional;
 public interface IBookService {
     List<BookDTO> getAll();
 
+    List<BookDTO> getAllByTitle(String title);
+
     BookDTO save(BookDTO bookDTO);
 
     BookDTO update(BookDTO bookDTO);

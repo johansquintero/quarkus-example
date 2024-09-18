@@ -36,5 +36,12 @@ public class BookResource {
     public Response delete(@PathParam("id") Long id) {
         return Response.status(Response.Status.OK).entity(this.bookService.delete(id)).build();
     }
+
+    @GET
+    @Path("/search-by-title/{title}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllByTitle(@PathParam("title") String title) {
+        return Response.status(Response.Status.OK).entity(this.bookService.getAllByTitle(title)).build();
+    }
 }
 
