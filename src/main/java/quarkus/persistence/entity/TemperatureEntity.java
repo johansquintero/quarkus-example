@@ -2,6 +2,9 @@ package quarkus.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +16,10 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode
 @Entity
 @Table(name = "temperatures")
+
+@FilterDef(name = "city.like", parameters = @ParamDef(name = "city", type = String.class))
+@Filter(name = "city.like", condition = "lower(city) LIKE lower(:city)")
+
 public class TemperatureEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

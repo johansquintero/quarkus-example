@@ -1,5 +1,6 @@
 package quarkus.service.implementation;
 
+import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -34,6 +35,17 @@ public class TemperatureServiceImpl implements ITemperatureService {
     }
 
     @Override
+    public List<TemperatureDTO> getAllByCity(String city) {
+        if (city==null || city.isEmpty()){
+            return this.getAll();
+        }
+        return this.temperatureCrudRepository.findAllByCity(city)
+                .stream()
+                .map(temperatureEntity -> modelMapper.map(temperatureEntity, TemperatureDTO.class))
+                .toList();
+    }
+
+    @Override
     public TemperatureDTO save(TemperatureDTO temperatureDTO) {
 //        Optional<TemperatureEntity> found = this.temperatures.stream()
 //                .filter(t -> t.getCity().equalsIgnoreCase(temperatureDTO.getCity()))
@@ -49,14 +61,14 @@ public class TemperatureServiceImpl implements ITemperatureService {
 
     @Override
     public TemperatureDTO update(TemperatureDTO temperatureDTO) {
-        TemperatureEntity found = this.temperatureCrudRepository.findByIdOptional(temperatureDTO.getId()).orElseThrow(()-> {
+        TemperatureEntity found = this.temperatureCrudRepository.findByIdOptional(temperatureDTO.getId()).orElseThrow(() -> {
             throw new TemperatureException("The temperatureDTO doesn't exists");
         });
         found.setCity(temperatureDTO.getCity());
         found.setMin(temperatureDTO.getMin());
         found.setMax(temperatureDTO.getMax());
         this.temperatureCrudRepository.persist(found);
-        return modelMapper.map(found,TemperatureDTO.class);
+        return modelMapper.map(found, TemperatureDTO.class);
     }
 
     @Override

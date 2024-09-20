@@ -23,6 +23,14 @@ public class TemperatureResource {
         return Response.ok(this.temperatureService.getAll()).build();
     }
 
+    @GET
+    @Path("/get-by-city/{city}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getByCity(@PathParam("city") String city) {
+        return Response.ok(this.temperatureService.getAllByCity(city)).build();
+    }
+
+
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Response save(TemperatureDTO temperatureDTO) {

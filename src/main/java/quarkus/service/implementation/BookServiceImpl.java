@@ -1,5 +1,7 @@
 package quarkus.service.implementation;
 
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
+import io.quarkus.panache.common.Page;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -8,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import quarkus.persistence.entity.BookEntity;
 import quarkus.presentation.advice.exception.BookException;
 import quarkus.presentation.dto.BookDTO;
+import quarkus.presentation.dto.PaginatedResponse;
 import quarkus.service.interfaces.IBookService;
 
 import java.util.List;
@@ -24,10 +27,19 @@ public class BookServiceImpl implements IBookService {
     }
 
     @Override
+    public PaginatedResponse<BookDTO> getAllByPage(int page) {
+        Page p = new Page(page,5);
+        PanacheQuery<BookEntity> pagination = BookEntity.findAll(Sort.descending("createdAt")).page(p);
+        List<BookDTO> data = pagination.list().stream()
+                .map(bookEntity -> modelMapper.map(bookEntity, BookDTO.class)).toList();
+        return new PaginatedResponse<>(data,pagination.page().index,pagination.pageCount());
+    }
+
+    @Override
     public List<BookDTO> getAllByTitle(String title) {
         Sort sort = Sort.by("publishedDate").and("title").descending();
         String filter = "%" + title + "%";
-        return title != null || !title.isEmpty()
+        return title != null && !title.isEmpty()
                 ? BookEntity.list("title ILIKE ?1", sort, filter)
                 .stream()
                 .map(bookEntity -> modelMapper.map(bookEntity, BookDTO.class)).toList()

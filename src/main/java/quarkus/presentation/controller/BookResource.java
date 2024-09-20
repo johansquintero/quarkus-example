@@ -18,6 +18,13 @@ public class BookResource {
         return Response.status(Response.Status.OK).entity(this.bookService.getAll()).build();
     }
 
+    @GET
+    @Path("/{page}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAll(@PathParam("page") @DefaultValue("0") int page) {
+        return Response.status(Response.Status.OK).entity(this.bookService.getAllByPage(page)).build();
+    }
+
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Response save(BookDTO bookDTO) {
