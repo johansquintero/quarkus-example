@@ -1,17 +1,17 @@
 package quarkus.service.implementation;
 
-import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
-import quarkus.TemperatureDTO;
+import quarkus.presentation.dto.temperature.TemperatureCreationDTO;
+import quarkus.presentation.dto.temperature.TemperatureDTO;
 import quarkus.persistence.entity.TemperatureEntity;
 import quarkus.persistence.repository.TemperatureCrudRepository;
 import quarkus.presentation.advice.exception.TemperatureException;
 import quarkus.service.interfaces.ITemperatureService;
+import quarkus.util.mapper.temperature.ITemperatureMapper;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,44 +19,35 @@ import java.util.Optional;
 @Transactional
 public class TemperatureServiceImpl implements ITemperatureService {
     private final TemperatureCrudRepository temperatureCrudRepository;
-    private final ModelMapper modelMapper;
+    private final ITemperatureMapper mapper;
 
     @Inject
-    public TemperatureServiceImpl(TemperatureCrudRepository temperatureCrudRepository) {
+    public TemperatureServiceImpl(TemperatureCrudRepository temperatureCrudRepository, ITemperatureMapper temperatureMapper) {
         this.temperatureCrudRepository = temperatureCrudRepository;
-        this.modelMapper = new ModelMapper();
+        this.mapper = temperatureMapper;
     }
 
     @Override
     public List<TemperatureDTO> getAll() {
-        return this.temperatureCrudRepository.listAll().stream().map(temperatureEntity -> {
-            return modelMapper.map(temperatureEntity, TemperatureDTO.class);
-        }).toList();
+        return this.temperatureCrudRepository.listAll().stream().map(mapper::fromEntitytoDto).toList();
     }
 
     @Override
     public List<TemperatureDTO> getAllByCity(String city) {
-        if (city==null || city.isEmpty()){
+        if (city == null || city.isEmpty()) {
             return this.getAll();
         }
         return this.temperatureCrudRepository.findAllByCity(city)
                 .stream()
-                .map(temperatureEntity -> modelMapper.map(temperatureEntity, TemperatureDTO.class))
+                .map(mapper::fromEntitytoDto)
                 .toList();
     }
 
     @Override
-    public TemperatureDTO save(TemperatureDTO temperatureDTO) {
-//        Optional<TemperatureEntity> found = this.temperatures.stream()
-//                .filter(t -> t.getCity().equalsIgnoreCase(temperatureDTO.getCity()))
-//                .findFirst();
-//        if (found.isPresent()) {
-//            throw new TemperatureException("The temperatureDTO already exists");
-//        }
-        temperatureDTO.setRegisteredDate(LocalDateTime.now());
-        TemperatureEntity newTemperature = modelMapper.map(temperatureDTO, TemperatureEntity.class);
+    public TemperatureDTO save(TemperatureCreationDTO temperatureDTO) {
+        TemperatureEntity newTemperature = this.mapper.fromCreationDtoToEntity(temperatureDTO);
         this.temperatureCrudRepository.persist(newTemperature);
-        return this.modelMapper.map(newTemperature, TemperatureDTO.class);
+        return this.mapper.fromEntitytoDto(newTemperature);
     }
 
     @Override
@@ -68,7 +59,7 @@ public class TemperatureServiceImpl implements ITemperatureService {
         found.setMin(temperatureDTO.getMin());
         found.setMax(temperatureDTO.getMax());
         this.temperatureCrudRepository.persist(found);
-        return modelMapper.map(found, TemperatureDTO.class);
+        return this.mapper.fromEntitytoDto(found);
     }
 
     @Override

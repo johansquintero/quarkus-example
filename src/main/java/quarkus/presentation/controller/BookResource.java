@@ -1,6 +1,7 @@
 package quarkus.presentation.controller;
 
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -28,13 +29,13 @@ public class BookResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response save(BookCreateDTO bookCreateDTO) {
+    public Response save(@Valid BookCreateDTO bookCreateDTO) {
         return Response.status(Response.Status.CREATED).entity(this.bookService.save(bookCreateDTO)).build();
     }
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    public Response update(BookDTO bookDTO) {
+    public Response update(@Valid BookDTO bookDTO) {
         return Response.status(Response.Status.CREATED).entity(this.bookService.update(bookDTO)).build();
     }
 

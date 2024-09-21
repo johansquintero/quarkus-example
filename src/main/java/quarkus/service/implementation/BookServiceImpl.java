@@ -6,14 +6,13 @@ import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import org.modelmapper.ModelMapper;
 import quarkus.persistence.entity.BookEntity;
 import quarkus.presentation.advice.exception.BookException;
 import quarkus.presentation.dto.book.BookCreateDTO;
 import quarkus.presentation.dto.book.BookDTO;
 import quarkus.presentation.dto.PaginatedResponse;
 import quarkus.service.interfaces.IBookService;
-import quarkus.util.mapper.IBookMapper;
+import quarkus.util.mapper.book.IBookMapper;
 
 import java.util.List;
 
@@ -30,7 +29,7 @@ public class BookServiceImpl implements IBookService {
     @Override
     public List<BookDTO> getAll() {
         System.out.println("llego");
-        return BookEntity.listAll().stream().map(bookMapper::toBookDTO).toList();
+        return BookEntity.listAll().stream().map(bookMapper::fromEntityDto).toList();
     }
 
     @Override
@@ -48,25 +47,25 @@ public class BookServiceImpl implements IBookService {
         return title != null && !title.isEmpty()
                 ? BookEntity.list("title ILIKE ?1", sort, filter)
                 .stream()
-                .map(bookMapper::toBookDTO).toList()
+                .map(bookMapper::fromEntityDto).toList()
                 : this.getAll();
     }
 
     @Override
     public BookDTO save(BookCreateDTO bookCreateDTO) {
-        BookEntity bookEntity = bookMapper.fromBookCreateDTOtoBookEntity(bookCreateDTO);
+        BookEntity bookEntity = bookMapper.fromCreationDtoToEntity(bookCreateDTO);
         bookEntity.persist();
-        return this.bookMapper.toBookDTO(bookEntity);
+        return this.bookMapper.fromEntityDto(bookEntity);
     }
 
     @Override
     public BookDTO update(BookDTO bookDTO) {
         BookEntity bookEntity = (BookEntity) BookEntity
                 .findByIdOptional(bookDTO.getId()).orElseThrow(() -> new BookException("The book doesn't exists"));
-        bookEntity.setTitle(bookDTO.getName());
+        bookEntity.setTitle(bookDTO.getTitle());
         bookEntity.setAuthor(bookDTO.getAuthor());
         bookEntity.persist();
-        return this.bookMapper.toBookDTO(bookEntity);
+        return this.bookMapper.fromEntityDto(bookEntity);
     }
 
     @Override

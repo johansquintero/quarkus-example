@@ -1,4 +1,4 @@
-package quarkus;
+package quarkus.presentation.controller;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;

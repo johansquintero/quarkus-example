@@ -1,5 +1,7 @@
-package quarkus;
+package quarkus.presentation.dto.temperature;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,10 +15,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class TemperatureDTO {
-
+    @NotNull
     private Long id;
+    @NotBlank
     private String city;
+    @NotNull
     private Integer min;
+    @NotNull
     private Integer max;
-    private LocalDateTime registeredDate;
 }

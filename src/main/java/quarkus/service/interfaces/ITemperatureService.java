@@ -1,6 +1,7 @@
 package quarkus.service.interfaces;
 
-import quarkus.TemperatureDTO;
+import quarkus.presentation.dto.temperature.TemperatureCreationDTO;
+import quarkus.presentation.dto.temperature.TemperatureDTO;
 
 import java.util.List;
 
@@ -9,7 +10,7 @@ public interface ITemperatureService {
 
     List<TemperatureDTO> getAllByCity(String city);
 
-    TemperatureDTO save(TemperatureDTO temperatureDTO);
+    TemperatureDTO save(TemperatureCreationDTO temperatureDTO);
 
     TemperatureDTO update(TemperatureDTO temperatureDTO);
 

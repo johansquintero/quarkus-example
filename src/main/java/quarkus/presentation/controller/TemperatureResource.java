@@ -1,10 +1,12 @@
 package quarkus.presentation.controller;
 
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import quarkus.TemperatureDTO;
+import quarkus.presentation.dto.temperature.TemperatureCreationDTO;
+import quarkus.presentation.dto.temperature.TemperatureDTO;
 import quarkus.service.interfaces.ITemperatureService;
 
 @Path("/temperature")
@@ -33,13 +35,13 @@ public class TemperatureResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response save(TemperatureDTO temperatureDTO) {
+    public Response save(@Valid TemperatureCreationDTO temperatureDTO) {
         return Response.status(Response.Status.CREATED).entity(this.temperatureService.save(temperatureDTO)).build();
     }
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    public Response update(TemperatureDTO update) {
+    public Response update(@Valid TemperatureDTO update) {
         return Response.ok(this.temperatureService.update(update)).build();
     }
 
