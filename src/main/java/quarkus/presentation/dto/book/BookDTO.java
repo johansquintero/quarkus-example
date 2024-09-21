@@ -1,10 +1,8 @@
-package quarkus.presentation.dto;
+package quarkus.presentation.dto.book;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import io.quarkus.runtime.annotations.RegisterForReflection;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -12,12 +10,12 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
+@RegisterForReflection
 public class BookDTO {
     private Long id;
     private String title;
     private String author;
     private LocalDate publishedDate;
     private String genre;
-    private LocalDate createdAt;
-    private LocalDate lastUpdate;
 }

@@ -4,35 +4,41 @@ import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.panache.common.Page;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import quarkus.persistence.entity.BookEntity;
 import quarkus.presentation.advice.exception.BookException;
-import quarkus.presentation.dto.BookDTO;
+import quarkus.presentation.dto.book.BookCreateDTO;
+import quarkus.presentation.dto.book.BookDTO;
 import quarkus.presentation.dto.PaginatedResponse;
 import quarkus.service.interfaces.IBookService;
+import quarkus.util.mapper.IBookMapper;
 
 import java.util.List;
 
 @ApplicationScoped
 @Transactional
 public class BookServiceImpl implements IBookService {
-    private final ModelMapper modelMapper = new ModelMapper();
+    private final IBookMapper bookMapper;
+
+    @Inject
+    public BookServiceImpl(IBookMapper bookMapper){
+        this.bookMapper = bookMapper;
+    }
 
     @Override
     public List<BookDTO> getAll() {
         System.out.println("llego");
-        return BookEntity.listAll().stream().map(bookEntity -> modelMapper.map(bookEntity, BookDTO.class)).toList();
+        return BookEntity.listAll().stream().map(bookMapper::toBookDTO).toList();
     }
 
     @Override
     public PaginatedResponse<BookDTO> getAllByPage(int page) {
         Page p = new Page(page,5);
-        PanacheQuery<BookEntity> pagination = BookEntity.findAll(Sort.descending("createdAt")).page(p);
-        List<BookDTO> data = pagination.list().stream()
-                .map(bookEntity -> modelMapper.map(bookEntity, BookDTO.class)).toList();
-        return new PaginatedResponse<>(data,pagination.page().index,pagination.pageCount());
+        PanacheQuery<BookDTO> pagination = BookEntity.findAll(Sort.descending("createdAt")).page(p).project(BookDTO.class);
+
+        return new PaginatedResponse<>(pagination);
     }
 
     @Override
@@ -42,25 +48,25 @@ public class BookServiceImpl implements IBookService {
         return title != null && !title.isEmpty()
                 ? BookEntity.list("title ILIKE ?1", sort, filter)
                 .stream()
-                .map(bookEntity -> modelMapper.map(bookEntity, BookDTO.class)).toList()
+                .map(bookMapper::toBookDTO).toList()
                 : this.getAll();
     }
 
     @Override
-    public BookDTO save(BookDTO bookDTO) {
-        BookEntity bookEntity = modelMapper.map(bookDTO, BookEntity.class);
+    public BookDTO save(BookCreateDTO bookCreateDTO) {
+        BookEntity bookEntity = bookMapper.fromBookCreateDTOtoBookEntity(bookCreateDTO);
         bookEntity.persist();
-        return modelMapper.map(bookEntity, BookDTO.class);
+        return this.bookMapper.toBookDTO(bookEntity);
     }
 
     @Override
     public BookDTO update(BookDTO bookDTO) {
         BookEntity bookEntity = (BookEntity) BookEntity
                 .findByIdOptional(bookDTO.getId()).orElseThrow(() -> new BookException("The book doesn't exists"));
-        bookEntity.setTitle(bookDTO.getTitle());
+        bookEntity.setTitle(bookDTO.getName());
         bookEntity.setAuthor(bookDTO.getAuthor());
         bookEntity.persist();
-        return modelMapper.map(bookEntity, BookDTO.class);
+        return this.bookMapper.toBookDTO(bookEntity);
     }
 
     @Override

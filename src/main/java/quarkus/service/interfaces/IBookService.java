@@ -1,10 +1,10 @@
 package quarkus.service.interfaces;
 
-import quarkus.presentation.dto.BookDTO;
+import quarkus.presentation.dto.book.BookCreateDTO;
+import quarkus.presentation.dto.book.BookDTO;
 import quarkus.presentation.dto.PaginatedResponse;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface IBookService {
     List<BookDTO> getAll();
@@ -13,7 +13,7 @@ public interface IBookService {
 
     List<BookDTO> getAllByTitle(String title);
 
-    BookDTO save(BookDTO bookDTO);
+    BookDTO save(BookCreateDTO bookCreateDTO);
 
     BookDTO update(BookDTO bookDTO);
 

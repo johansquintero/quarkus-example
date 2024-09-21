@@ -4,7 +4,8 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import quarkus.presentation.dto.BookDTO;
+import quarkus.presentation.dto.book.BookCreateDTO;
+import quarkus.presentation.dto.book.BookDTO;
 import quarkus.service.interfaces.IBookService;
 
 @Path("/book")
@@ -27,8 +28,8 @@ public class BookResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response save(BookDTO bookDTO) {
-        return Response.status(Response.Status.CREATED).entity(this.bookService.save(bookDTO)).build();
+    public Response save(BookCreateDTO bookCreateDTO) {
+        return Response.status(Response.Status.CREATED).entity(this.bookService.save(bookCreateDTO)).build();
     }
 
     @PUT
